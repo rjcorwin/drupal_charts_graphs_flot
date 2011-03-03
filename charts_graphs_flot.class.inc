@@ -167,17 +167,11 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
     $chart_id = 'flotchart-' . charts_graphs_chart_id_generator();
     $data = array();
 
-    $data[] = sprintf(<<<TABLE
-      <div id="%s" class="flot-data-table">[
-        
-TABLE
-      ,
-        $chart_id
-    );
+    $data[] = sprintf('<div id="%s" class="flot-data-table">[', $chart_id);
     $i = 0;
-    $arr = array();
-    foreach($series['Temperature'] as $t) {
-      $arr[] = array( $t, $series['Post date'][$i]);
+    $keys = array_keys($series);
+    foreach($series[$keys[0]] as $value) {
+      $arr[] = array($series[$keys[1]][$i], $series[$keys[0]][$i]);
       $i++;
     }
     $data[] = drupal_to_js($arr);
