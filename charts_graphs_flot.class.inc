@@ -167,7 +167,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
     $chart_id = 'flotchart-' . charts_graphs_chart_id_generator();
     $data = array();
 
-    $data[] = sprintf('<div id="%s" class="flot-data-table">[', $chart_id);
+    $data[] = sprintf('<div id="%s" class="flot-data-table">', $chart_id);
     $i = 0;
     $keys = array_keys($series);
     foreach($series[$keys[0]] as $value) {
@@ -176,7 +176,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
     }
     $data[] = drupal_to_js($arr);
 
-    $data[] = "]</div>\n";
+    $data[] = "</div>\n";
 
 
     $this->_initialize_final_parameters($chart_id, $transpose);
@@ -194,12 +194,23 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
 
     $javascript = '
         var ChartsAndGraphs = ChartsAndGraphs || {};
-
+        // This currently runs as many times as there are displays!
         ChartsAndGraphs.init = function() {
-
-          var data = eval($("#%chart_id").text());
-          $.plot($("#%chart_id-graph"), data);
-
+          var data = [];
+          var i = 2;
+          
+          while($("#flotchart-" + i).text()) {
+            data.push(eval($("#flotchart-" + i).text()));
+            if("#flotchart-" + i != "#flotchart-2") {
+             $("#flotchart-" + i + "-graph").hide();
+             $("#flotchart-" + i).hide();
+            }
+            i = i + 2;
+          };
+          $("#flotchart-2").hide();
+          $.plot($("#flotchart-2-graph"), data);
+          
+          
         }
         $(window).load(ChartsAndGraphs.init);
 
