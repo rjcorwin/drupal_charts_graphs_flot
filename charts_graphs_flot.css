@@ -1,4 +1,9 @@
 
+/* So legends don't have width of 100% as they often do in Drupal */
+.legend table {
+     width: auto;
+}
+
 table.bluff-data-table {
   left: -9999px;
   position: absolute;

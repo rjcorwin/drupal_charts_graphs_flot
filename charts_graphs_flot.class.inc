@@ -17,6 +17,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
   var $title_font_size = 32;
   var $xaxis = "";
   var $yaxis = "";
+  var $group_label = "";
   var $grouping = "";
   /**
    * Parameters set directly by the user.
@@ -146,7 +147,6 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
 
     $data[] = sprintf('<div id="%s" class="flot-data-table">', $chart_id);
     $i = 0;
-    $groupby = $this->grouping;
     $xaxis = $this->xaxis;
     $yaxis = $this->yaxis;
     $keys = array_keys($series);
@@ -154,7 +154,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
       $data_points[] = array($this->utime_to_jstime($series[$xaxis][$i]), $series[$yaxis][$i]);
       $i++;
     }
-    $flot_data = array("label" => $series[$groupby][0], "data" => $data_points);
+    $flot_data = array("label" => $this->group_label, "data" => $data_points);
     $data[] = "[" . drupal_to_js($flot_data) . "]";
 
     $data[] = "</div>\n";
@@ -163,7 +163,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
     $this->_initialize_final_parameters($chart_id, $transpose);
 
     $canvas = '
-      <div id="%chart_id-graph" style="width:%widthpx; height:%heightpx; position: relative;"></div>';
+      <div id="%chart_id-graph" style="width:%width; height:%height; position: relative;"></div>';
     $canvas = strtr(
       $canvas,
       array(
