@@ -1,0 +1,4 @@
+
+Since version 3.6.1 Bluff is dual licensed - MIT and GPL - so it can be
+distributed together with Charts and Graphs code, i.e., you don't have to do
+anything  else, it's ready to use.
