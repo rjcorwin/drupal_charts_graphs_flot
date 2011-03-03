@@ -15,7 +15,9 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
   var $height = 200;
   var $title = '';
   var $title_font_size = 32;
-
+  var $xaxis = "";
+  var $yaxis = "";
+  var $grouping = "";
   /**
    * Parameters set directly by the user.
    *
@@ -34,41 +36,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
    */
   var $transpose = NULL;
 
-  protected function _get_translated_chart_type() {
-    switch ($this->type) {
-      case 'mini_bar':
-        $type = 'Mini.Bar';
-        break;
-
-      case 'mini_pie':
-        $type = 'Mini.Pie';
-        break;
-
-      case 'mini_side_bar':
-        $type = 'Mini.SideBar';
-        break;
-
-      case 'side_bar':
-        $type = 'SideBar';
-        break;
-
-      case 'stacked_side_bar':
-        $type = 'SideStackedBar';
-        break;
-
-      case 'stacked_area':
-        $type = 'StackedArea';
-        break;
-
-       case 'stacked_bar':
-         $type = 'StackedBar';
-         break;
-
-      default:
-        $type = ucfirst($this->type);
-    }
-    return $type;
-  }
+  function _get_translated_chart_type() {}
 
   protected function _initialize_final_parameters($chart_id, $transpose) {
     $parameters = array();
@@ -148,7 +116,16 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
     }
     return $output;
   }
-
+  
+ public function utime_to_jstime($timestamp) {
+  $original_date = new DateTime(NULL, new DateTimeZone(date_default_timezone_name()));
+  $original_date->setTimestamp($timestamp);
+  $adjusted_date = new DateTime($original_date->format('Y-m-d H:i:s'), new DateTimeZone('UTC'));
+  $newtime = $adjusted_date->format('U');
+  // Convert the Unix timestamp to milliseconds so Javascript can understand it
+  $newtime = $newtime * 1000;
+  return $newtime;
+ }
   /**
    * Function that renders data.
    */
@@ -169,12 +146,16 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
 
     $data[] = sprintf('<div id="%s" class="flot-data-table">', $chart_id);
     $i = 0;
+    $groupby = $this->grouping;
+    $xaxis = $this->xaxis;
+    $yaxis = $this->yaxis;
     $keys = array_keys($series);
     foreach($series[$keys[0]] as $value) {
-      $arr[] = array($series[$keys[1]][$i], $series[$keys[0]][$i]);
+      $data_points[] = array($this->utime_to_jstime($series[$xaxis][$i]), $series[$yaxis][$i]);
       $i++;
     }
-    $data[] = drupal_to_js($arr);
+    $flot_data = array("label" => $series[$groupby][0], "data" => $data_points);
+    $data[] = "[" . drupal_to_js($flot_data) . "]";
 
     $data[] = "</div>\n";
 
@@ -200,7 +181,8 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
           var i = 2;
           
           while($("#flotchart-" + i).text()) {
-            data.push(eval($("#flotchart-" + i).text()));
+            var set = eval($("#flotchart-" + i).text());
+            data.push(set[0]);
             if("#flotchart-" + i != "#flotchart-2") {
              $("#flotchart-" + i + "-graph").hide();
              $("#flotchart-" + i).hide();
@@ -208,9 +190,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
             i = i + 2;
           };
           $("#flotchart-2").hide();
-          $.plot($("#flotchart-2-graph"), data);
-          
-          
+          $.plot($("#flotchart-2-graph"), data, {"xaxis": { "mode": "time" } });
         }
         $(window).load(ChartsAndGraphs.init);
 
