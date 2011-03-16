@@ -164,7 +164,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
     $data = array();
     $data[] = sprintf('<div id="%s" class="flot-data-table">', $chart_id);
     $flot_data = array("label" => $this->group_label, "data" => $series);
-    $data[] = "[" . drupal_to_js($flot_data) . "]";
+    $data[] = "[" . drupal_to_js($series) . "]";
     $data[] = "</div>\n";
 
     $this->_initialize_final_parameters($chart_id, $transpose);
@@ -197,10 +197,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
             i = i + 2;
           };
           $("#flotchart-2").hide();
-          $.plot($("#flotchart-2-graph"), data, {"xaxis": { "mode": "time" }, series: {
-            lines: { show: true },
-            points: { show: true }
-        }, });
+          $.jqplot("flotchart-2-graph", data);
         }
         $(window).load(ChartsAndGraphs.init);
 
