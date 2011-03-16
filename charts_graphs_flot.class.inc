@@ -127,7 +127,24 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
   $newtime = $newtime * 1000;
   return $newtime;
  }
-  /**
+
+ public function  set_data($rows, $x_labels) {
+    parent::set_data($rows, $x_labels);
+    $i = 0;
+    // $xaxis = $this->xaxis;
+    // $yaxis = $this->yaxis;
+    $series = $rows;
+    $keys = array_keys($series);
+    foreach($series[$keys[0]] as $value) {
+      // rjstatic: I'm not sure we can always count on the order of the series data to be y, x, z ...
+      // $data_points[] = array($this->utime_to_jstime($series[$xaxis][$i]), $series[$yaxis][$i]);
+      $data_points[] = array($this->utime_to_jstime($series[$keys[1]][$i]), $series[$keys[0]][$i]);
+      $i++;
+    }
+    $this->series = $data_points;
+  }
+
+ /**
    * Function that renders data.
    */
   public function get_chart() {
@@ -143,22 +160,12 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
     $x_labels = $this->x_labels;
     $series = $this->series;
     $chart_id = 'flotchart-' . charts_graphs_chart_id_generator();
+
     $data = array();
-
     $data[] = sprintf('<div id="%s" class="flot-data-table">', $chart_id);
-    $i = 0;
-    $xaxis = $this->xaxis;
-    $yaxis = $this->yaxis;
-    $keys = array_keys($series);
-    foreach($series[$keys[0]] as $value) {
-      $data_points[] = array($this->utime_to_jstime($series[$xaxis][$i]), $series[$yaxis][$i]);
-      $i++;
-    }
-    $flot_data = array("label" => $this->group_label, "data" => $data_points);
+    $flot_data = array("label" => $this->group_label, "data" => $series);
     $data[] = "[" . drupal_to_js($flot_data) . "]";
-
     $data[] = "</div>\n";
-
 
     $this->_initialize_final_parameters($chart_id, $transpose);
 
@@ -171,7 +178,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
         '%width' => $this->width,
         '%height' => $this->height,
     ));
-    $html = implode('', $data);
+    $data = implode('', $data);
 
     $javascript = '
         var ChartsAndGraphs = ChartsAndGraphs || {};
@@ -190,7 +197,10 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
             i = i + 2;
           };
           $("#flotchart-2").hide();
-          $.plot($("#flotchart-2-graph"), data, {"xaxis": { "mode": "time" } });
+          $.plot($("#flotchart-2-graph"), data, {"xaxis": { "mode": "time" }, series: {
+            lines: { show: true },
+            points: { show: true }
+        }, });
         }
         $(window).load(ChartsAndGraphs.init);
 
@@ -213,7 +223,7 @@ class ChartsGraphsFlot extends ChartsGraphsCanvas {
     drupal_add_js($js, 'inline');
 
 
-    return $html . $canvas; //. $javascript;
+    return $data . $canvas; //. $javascript;
   }
 
   /**
